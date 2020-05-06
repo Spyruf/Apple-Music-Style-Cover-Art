@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+    <!-- <link rel="stylesheet" href="/css/sanfrancisco-font.css"> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- <style>
+        body {
+            font-family: SF Display;
+        }
+    </style> -->
+
+    <script src="https://unpkg.com/vanilla-picker@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+
+
+    <title>Apple Music Style Cover Art</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <br>
+        <div class="row">
+            <div class="col text-center">
+                <h1>Apple Music Style Cover Art</h1>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 text-center">
+                <canvas id="canvas-display">Your browser does not support the HTML5 canvas tag.</canvas>
+                <img class="img-fluid" id="art" src="" alt="">
+            </div>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-6">
+                        <h4>Color 1:</h4>
+                        <div id="picker1"></div>
+                    </div>
+                    <div class="col-6">
+                        <h4>Color 2:</h4>
+                        <div id="picker2"></div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <col-12>
+
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="New Music" aria-label="New Music">
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Mix" aria-label="Mix">
+                        </div>
+
+                    </col-12>
+
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <script>
+            // var canvas_scale_factor = 0.40
+            var gradient_scale_factor = 5 //TODO: Changeable
+            var color1 = "#ff0000"; // red
+            var color2 = "#ffffff"; // white
+            var string1 = "";
+            var string2 = "";
+
+            var c = document.getElementById("canvas-display");
+            var ctx = c.getContext("2d");
+
+            ctx.canvas.width = 380;
+            ctx.canvas.height = ctx.canvas.width;
+            ctx.font = '20px SF Display';
+
+
+
+            // // Auto resize canvas window
+            // window.addEventListener('resize', resizeCanvas, false);
+            // resizeCanvas();    /// call the first time page is loaded
+            // function resizeCanvas() {
+            //     ctx.canvas.width = innerWidth * canvas_scale_factor;
+            //     ctx.canvas.height = innerWidth * canvas_scale_factor;
+            // }
+
+
+            var colorPicker1 = new iro.ColorPicker('#picker1', {
+                color: { r: 255, g: 0, b: 0, a: 1 },
+                layout: [
+                    {
+                        component: iro.ui.Box,
+                        options: {}
+                    },
+                    {
+                        component: iro.ui.Slider,
+                        options: {
+                            sliderType: 'hue' // can 'hue', 'saturation', 'value', 'alpha' or 'kelvin'
+                        }
+                    },
+                ],
+            });
+            var colorPicker2 = new iro.ColorPicker('#picker2', {
+                color: { r: 255, g: 255, b: 255, a: 1 },
+                layout: [
+                    {
+                        component: iro.ui.Box,
+                        options: {}
+                    },
+                    {
+                        component: iro.ui.Slider,
+                        options: {
+                            sliderType: 'hue' // can 'hue', 'saturation', 'value', 'alpha' or 'kelvin'
+                        }
+                    },
+                ],
+            });
+
+            colorPicker1.on('color:change', function (color) {
+                color1 = color.rgbaString;
+                update()
+            });
+            colorPicker2.on('color:change', function (color) {
+                color2 = color.rgbaString;
+                update()
+            });
+
+
+
+            // You can do what you want with the chosen color using two callbacks: onChange and onDone.
+            picker1.onChange = function (color) {
+                parent.style.background = color.rgbaString;
+                color1 = color.rgbaString;
+                update()
+            };
+
+            update() // call update at the beginning
+            function update() {
+                // Update Canvas
+                var grd = ctx.createLinearGradient(0, ctx.canvas.height * gradient_scale_factor, ctx.canvas.width * gradient_scale_factor, 0);
+                grd.addColorStop(0, color1);
+                grd.addColorStop(1, color2);
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                size = ctx.canvas.width
+                reference_size = 380;
+                //1 px = 0.75 point; 1 point = 1.333333 px
+
+                // ------------  Text------------
+                font_ratio = 29 / (reference_size * 3 / 4); // point / point
+                font_size = size * 3 / 4 * font_ratio; // font should be in point
+                var textString = "";
+                // context.font="italic small-caps bold 12px arial";
+                ctx.font = '800 ' + font_size + 'pt';
+                ctx.fillStyle = "white";
+                console.log(font_size + "pt ----" + ctx.font);
+
+                var x = (size * (47.83 / reference_size)) - (ctx.measureText(textString).width / 2);
+                var y = (size * (47.22 / reference_size));
+                ctx.textBaseline = "middle"
+                ctx.fillText(textString, x, y);
+
+                // ------------ MUSIC Text------------
+                font_ratio = 22 / (reference_size * 3 / 4); // point / point
+                font_size = size * 3 / 4 * font_ratio; // font should be in point
+                var textString = "MUSIC";
+                ctx.font = '900 ' + font_size + 'pt';
+                ctx.fillStyle = "white";
+                console.log(font_size + "pt ----" + ctx.font);
+
+                var x = (size * (95.2 / reference_size)) - (ctx.measureText(textString).width / 2);
+                var y = (size * (47.22 / reference_size));
+                ctx.textBaseline = "middle"
+                ctx.fillText(textString, x, y);
+
+                // Update Image
+                img = document.getElementById("art");
+                img.src = c.toDataURL("image/png");
+            }
+
+        </script>
+
+
+
+</body>
+
+</html>
